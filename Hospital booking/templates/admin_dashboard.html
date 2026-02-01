@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="admin-dashboard">
+
+  <h2>Admin Dashboard</h2>
+
+  <!-- ================= USERS ================= -->
+  <section class="admin-section">
+    <h3>Registered Users</h3>
+
+    <div class="admin-card-grid">
+      {% for u in users %}
+      <div class="admin-card">
+        <p><strong>Username:</strong> {{ u.username }}</p>
+        <p><strong>Email:</strong> {{ u.email }}</p>
+        <p><strong>Role:</strong> {{ u.role }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- ================= ADD DOCTOR ================= -->
+  <section class="admin-section">
+    <h3>Add Doctor</h3>
+
+    <div class="admin-card">
+      <input id="doc-username" placeholder="Username">
+      <input id="doc-email" placeholder="Email">
+      <input id="doc-password" type="password" placeholder="Password">
+
+      <input id="doc-name" placeholder="Doctor Name">
+      <input id="doc-department" placeholder="Department">
+      <input id="doc-experience" placeholder="Experience (years)">
+      <input id="doc-certificate" placeholder="Certificates">
+
+      <button id="btn-add-doctor" class="btn-primary">
+        Add Doctor
+      </button>
+    </div>
+  </section>
+
+  <!-- ================= DOCTORS ================= -->
+  <section class="admin-section">
+    <h3>Doctors</h3>
+
+    <div class="admin-card-grid">
+      {% for d in doctors %}
+      <div class="admin-card">
+        <p><strong>Name:</strong> {{ d.name }}</p>
+        <p><strong>Department:</strong> {{ d.department }}</p>
+        <p><strong>Experience:</strong> {{ d.experience_years }} years</p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- ================= BOOKINGS ================= -->
+  <section class="admin-section">
+    <h3>All Bookings</h3>
+
+    <div class="admin-card-grid">
+      {% for b in bookings %}
+      <div class="admin-card">
+        <p><strong>User:</strong> {{ b.user.username }}</p>
+        <p><strong>Doctor:</strong> {{ b.doctor.name }}</p>
+        <p>
+          <strong>Time:</strong>
+          {{ b.start_time.strftime("%d %b %Y %I:%M %p") }}
+        </p>
+        <p><strong>Status:</strong> {{ b.status }}</p>
+
+        {% if b.status == "booked" %}
+          <button
+            class="btn-secondary btn-admin-cancel"
+            data-id="{{ b.id }}">
+            Cancel Booking
+          </button>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ================= ADD DOCTOR ================= */
+document.getElementById("btn-add-doctor")?.addEventListener("click", async () => {
+
+  const body = {
+    username: document.getElementById("doc-username").value,
+    email: document.getElementById("doc-email").value,
+    password: document.getElementById("doc-password").value,
+    name: document.getElementById("doc-name").value,
+    department: document.getElementById("doc-department").value,
+    experience: document.getElementById("doc-experience").value,
+    certificate: document.getElementById("doc-certificate").value
+  };
+
+  const res = await fetch("/api/admin/doctor/add", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+
+  const data = await res.json();
+  alert(data.message || "Doctor added");
+  if (data.success) location.reload();
+});
+
+/* ================= CANCEL BOOKING ================= */
+document.querySelectorAll(".btn-admin-cancel").forEach(btn => {
+  btn.addEventListener("click", async () => {
+    const reason = prompt("Enter reason to cancel booking:");
+    if (!reason) return;
+
+    const res = await fetch(`/api/booking/${btn.dataset.id}/cancel`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reason })
+    });
+
+    const data = await res.json();
+    alert(data.message || "Booking cancelled");
+    if (data.success) location.reload();
+  });
+});
+</script>
+
+{% endblock %}

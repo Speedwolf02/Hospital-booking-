@@ -1,0 +1,319 @@
+/* ================= GLOBAL ================= */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: radial-gradient(circle at top, #050816 0, #020109 40%, #000000 100%);
+  color: #e5e7eb;
+}
+
+/* ================= TOP NAV ================= */
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 26px;
+  background: rgba(10, 10, 10, 0.9);
+  border-bottom: 1px solid #1f2937;
+}
+
+.top-nav a {
+  color: #cbd5f5;
+  margin-left: 18px;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.top-nav a:hover {
+  color: #22c55e;
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+/* ================= HERO ================= */
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 70px 10vw;
+}
+
+.hero-text h1 {
+  font-size: 2.6rem;
+  margin-bottom: 12px;
+}
+
+.hero-text p {
+  max-width: 420px;
+  opacity: 0.85;
+  margin-bottom: 20px;
+}
+
+/* ================= GLOW CIRCLE ================= */
+.glow-circle {
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(34,197,94,0.35), transparent 60%);
+  box-shadow: 0 0 60px rgba(34,197,94,0.7);
+  position: relative;
+  overflow: hidden;
+}
+
+.glow-circle.small {
+  width: 220px;
+  height: 220px;
+  margin: auto;
+}
+
+.web-lines {
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  border: 1px solid rgba(34,197,94,0.5);
+  animation: spin 12s linear infinite;
+  box-shadow: 0 0 18px rgba(34,197,94,0.5);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ================= BUTTONS ================= */
+.btn-primary {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  color: #020617;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 20px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #e5e7eb;
+  border: 1px solid #22c55e;
+  border-radius: 999px;
+  padding: 9px 16px;
+  cursor: pointer;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ================= AUTH ================= */
+.auth-card {
+  max-width: 420px;
+  margin: 60px auto;
+  padding: 26px;
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: 18px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+}
+
+.auth-card input,
+.auth-card textarea {
+  width: 100%;
+  margin-bottom: 14px;
+  padding: 10px;
+  background: #020617;
+  border: 1px solid #374151;
+  border-radius: 10px;
+  color: #e5e7eb;
+}
+
+/* ================= USER DASHBOARD ================= */
+.user-layout {
+  display: grid;
+  grid-template-columns: 1.1fr 1.7fr;
+  gap: 26px;
+  padding: 26px;
+}
+
+.voice-panel,
+.booking-panel {
+  background: rgba(15, 23, 42, 0.88);
+  padding: 18px;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+}
+
+/* ================= CHAT ================= */
+.chat-log {
+  background: #020617;
+  border: 1px solid #111827;
+  border-radius: 12px;
+  padding: 10px;
+  max-height: 180px;
+  overflow-y: auto;
+  font-size: 0.92rem;
+}
+
+.chat-line {
+  margin-bottom: 6px;
+}
+
+/* ================= AI TOGGLE ================= */
+.ai-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.switch {
+  position: relative;
+  width: 48px;
+  height: 24px;
+}
+
+.switch input { display: none; }
+
+.slider {
+  position: absolute;
+  inset: 0;
+  background: #555;
+  border-radius: 24px;
+  transition: 0.3s;
+}
+
+.slider:before {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 4px;
+  bottom: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+input:checked + .slider {
+  background: #22c55e;
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+/* ================= FORMS ================= */
+.booking-panel input,
+.booking-panel select,
+.booking-panel textarea {
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 9px;
+  border-radius: 8px;
+  border: 1px solid #374151;
+  background: #020617;
+  color: #e5e7eb;
+}
+
+/* ================= DOCTOR CARDS ================= */
+.doctor-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.doctor-card {
+  background: #020617;
+  border-radius: 14px;
+  padding: 14px;
+  border: 1px solid #1f2937;
+  cursor: pointer;
+  flex: 1 0 180px;
+}
+
+.doctor-card.selected {
+  border-color: #22c55e;
+  box-shadow: 0 0 24px rgba(34,197,94,0.6);
+}
+
+.verified {
+  color: #22c55e;
+  font-size: 0.9rem;
+}
+
+/* ================= BOOKINGS ================= */
+.booking-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
+  gap: 14px;
+}
+
+.booking-card {
+  background: #020617;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid #111827;
+}
+
+/* ================= DASHBOARDS ================= */
+.admin-card,
+.doctor-card-grid .doctor-card {
+  background: #020617;
+  border-radius: 14px;
+  padding: 14px;
+  border: 1px solid #1f2937;
+}
+
+.admin-card-grid,
+.doctor-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
+  gap: 16px;
+}
+
+/* ================= MODAL ================= */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: #020617;
+  border: 1px solid #22c55e;
+  border-radius: 16px;
+  padding: 22px;
+  max-width: 420px;
+}
+
+/* ================= TEXT HELPERS ================= */
+.info-text {
+  color: #93c5fd;
+}
+
+.error-text {
+  color: #ef4444;
+}
+
+.success-text {
+  color: #22c55e;
+}
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+.modal-content { background: white; padding: 20px; border-radius: 12px; width: 80%; max-width: 500px; text-align: center; }
+.doctor-selection-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; max-height: 300px; overflow-y: auto; }
+.doc-transfer-card { border: 1px solid #ddd; padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+.doc-transfer-card:hover { border-color: #007bff; background: #f0f7ff; }
+.doc-transfer-card img { width: 50px; height: 50px; border-radius: 50%; }

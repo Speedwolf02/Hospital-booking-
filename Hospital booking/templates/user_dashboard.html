@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- ================= NOTIFICATION POPUP ================= -->
+<div id="notification-modal" class="modal hidden">
+  <div class="modal-content">
+    <h3 id="notif-title"></h3>
+    <p id="notif-message"></p>
+    <p id="notif-time" class="notif-time"></p>
+    <button id="notif-close" class="btn-primary">OK</button>
+  </div>
+</div>
+
+<div class="user-layout">
+
+  <!-- ================= VOICE ASSISTANT PANEL ================= -->
+  <div class="voice-panel">
+
+    <h2>Voice Assistant</h2>
+
+    <!-- AI Toggle -->
+    <div class="ai-toggle">
+      <label class="switch">
+        <input type="checkbox" id="ai-toggle">
+        <span class="slider"></span>
+      </label>
+      <span>AI Mode</span>
+    </div>
+
+    <!-- Glowing Circle -->
+    <div class="glow-circle small">
+      <div class="web-lines"></div>
+    </div>
+
+    <!-- Chat Box -->
+    <div class="chat-box">
+      <div id="chat-log" class="chat-log"></div>
+    </div>
+
+    <!-- Voice Buttons -->
+    <div class="voice-buttons">
+      <button id="btn-start-voice-booking" class="btn-primary">
+        Start Voice Booking
+      </button>
+
+      <button id="btn-stop-voice-booking" class="btn-secondary">
+        Stop Voice Booking
+      </button>
+    </div>
+
+    <p id="stt-text" class="stt-text"></p>
+
+  </div>
+
+  <!-- ================= BOOKING PANEL ================= -->
+  <div class="booking-panel">
+
+    <h2>Book Appointment</h2>
+
+    <form id="booking-form" onsubmit="return false;">
+
+      <label>Name</label>
+      <input type="text" id="user-name"
+             value="{{ current_user.username }}" required>
+
+      <label>Email</label>
+      <input type="email" id="user-email"
+             value="{{ current_user.email }}" required>
+
+      <label>Booking Time (YYYY-MM-DD HH:MM)</label>
+      <input type="text" id="booking-time"
+             placeholder="2025-12-10 12:00">
+
+      <label>Session Type</label>
+      <select id="session-type">
+        <option value="offline">Offline</option>
+        <option value="online">Online</option>
+      </select>
+
+      <label>Issue</label>
+      <textarea id="issue" rows="3"
+                placeholder="Describe your problem"></textarea>
+
+      <!-- DOCTOR CARDS -->
+      <label>Choose Doctor</label>
+      <div class="doctor-cards">
+        {% for d in doctors %}
+        <div class="doctor-card" data-doctor-id="{{ d.id }}">
+          <h3>{{ d.name }}</h3>
+          <p>{{ d.department }}</p>
+          <p>{{ d.experience_years }} years experience</p>
+          <p class="verified">Verified Doctor</p>
+        </div>
+        {% endfor %}
+      </div>
+
+      <input type="hidden" id="selected-doctor-id">
+
+      <button type="button" id="btn-check-slot"
+              class="btn-secondary">
+        Check Slot
+      </button>
+
+      <button type="button" id="btn-open-confirm"
+              class="btn-primary" disabled>
+        Save Booking
+      </button>
+
+      <p id="booking-status"></p>
+    </form>
+
+    <!-- ================= MY BOOKINGS ================= -->
+    <h2>My Bookings</h2>
+
+    <div class="booking-cards">
+
+      {% for b in bookings %}
+      <div class="booking-card">
+
+        <h3>
+          Dr. {{ b.doctor.name }}
+          (Token {{ b.token_number }})
+        </h3>
+
+        <p>
+          {{ b.start_time.strftime("%d %b %Y %I:%M %p") }}
+          –
+          {{ b.end_time.strftime("%I:%M %p") }}
+        </p>
+
+        <p>Status: <strong>{{ b.status }}</strong></p>
+        <p>Issue: {{ b.issue_description }}</p>
+
+        {% if b.status == "booked" %}
+          <button
+            class="btn-secondary btn-cancel-booking"
+            data-id="{{ b.id }}">
+            Cancel Booking
+          </button>
+        {% endif %}
+
+        {% if b.status == "ongoing" %}
+          <p class="info-text">
+            Consultation in progress...
+          </p>
+        {% endif %}
+
+        {% if b.status == "completed" %}
+          <div class="prescription-upload-area">
+            <label>Upload Prescription Image:</label>
+            <input type="file" id="presc-file-{{ b.id }}" accept="image/*">
+    
+            <button class="btn-primary btn-upload-presc" data-id="{{ b.id }}">
+              Upload & Scan
+            </button>
+          </div>
+
+          <div id="scan-result-{{ b.id }}" class="scan-result hidden">
+            <strong>AI Analysis:</strong>
+            <p class="ai-text"></p>
+            </div>
+        {% endif %}
+
+        {% if b.status == "cancelled" %}
+          <p class="error-text">
+            Cancelled: {{ b.cancel_reason }}
+          </p>
+        {% endif %}
+
+      </div>
+      {% endfor %}
+
+    </div>
+  </div>
+</div>
+
+<!-- ================= CONFIRM MODAL ================= -->
+<div id="booking-confirm-modal" class="modal hidden">
+  <div class="modal-content">
+
+    <h3>Confirm Booking</h3>
+
+    <p><strong>Name:</strong> <span id="confirm-name"></span></p>
+    <p><strong>Email:</strong> <span id="confirm-email"></span></p>
+    <p><strong>Time:</strong> <span id="confirm-time"></span></p>
+    <p><strong>Session:</strong> <span id="confirm-session"></span></p>
+    <p><strong>Issue:</strong> <span id="confirm-issue"></span></p>
+    <p><strong>Doctor:</strong> <span id="confirm-doctor"></span></p>
+
+    <div class="modal-actions">
+      <button id="btn-confirm-save" class="btn-primary">
+        Confirm
+      </button>
+      <button id="btn-confirm-cancel" class="btn-secondary">
+        Cancel
+      </button>
+    </div>
+
+  </div>
+</div>
+
+{% if notifications %}
+<div id="notifPopup" class="modal-overlay">
+    <div class="modal-content">
+        <h4 style="color: #d9534f;">⚠️ Appointment Update</h4>
+        <div class="notif-list">
+            {% for n in notifications %}
+                <p class="notif-item">{{ n.message }}</p>
+            {% endfor %}
+        </div>
+        <button onclick="closeNotif()" class="btn-primary">Understood</button>
+    </div>
+</div>
+{% endif %}
+
+<script>
+function closeNotif() {
+    document.getElementById('notifPopup').style.display = 'none';
+    // Optional: Call an API to mark notifications as 'read' in DB
+}
+
+let selectedBookingId = null;
+function openTransferModal(bookingId) {
+    selectedBookingId = bookingId;
+    document.getElementById('transferModal').style.display = 'flex';
+}
+
+async function confirmTransfer(docId, docName) {
+    if(!confirm(`Transfer this booking to Dr. ${docName}?`)) return;
+    
+    const res = await fetch(`/api/doctor/booking/${selectedBookingId}/transfer`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ new_doctor_id: docId })
+    });
+    const data = await res.json();
+    if(data.success) location.reload();
+}
+async function closeNotif() {
+    // 1. Hide the popup immediately
+    document.getElementById('notifPopup').style.display = 'none';
+
+    // 2. Tell the backend to mark them as read
+    await fetch('/api/notifications/mark_read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    });
+}
+</script>
+<style>
+/* Notification Popup Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6); /* Dimmed background */
+    display: flex; /* Centers the box */
+    justify-content: center;
+    align-items: center;
+    z-index: 2000; /* Ensure it's on top of everything */
+}
+
+.modal-content {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 450px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.notif-item {
+    background: #fff3cd; /* Light yellow warning color */
+    border-left: 5px solid #ffc107;
+    padding: 10px;
+    margin-bottom: 10px;
+    text-align: left;
+    font-size: 0.95rem;
+    color: #856404;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+
+{% endblock %}

@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="doctor-dashboard">
+
+  <h2>Doctor Dashboard</h2>
+  <p class="subtitle">Welcome Dr. {{ doctor.name }}</p>
+
+  <!-- ================= FREE SCHEDULE ================= -->
+  <section class="doctor-section">
+    <h3>Set Free Schedule</h3>
+
+    <div class="doctor-card-grid">
+      <div class="doctor-card">
+
+        <label>Start Time</label>
+        <input type="datetime-local" id="doc-start">
+
+        <label>End Time</label>
+        <input type="datetime-local" id="doc-end">
+
+        <button id="btn-doc-add-schedule" class="btn-primary">
+          Add Free Slot
+        </button>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= BOOKINGS ================= -->
+  <section class="doctor-section">
+    <h3>My Appointments</h3>
+
+    <div class="doctor-card-grid">
+
+      {% for b in bookings %}
+      <div class="doctor-card">
+
+
+        <h4>{{ b.user.username }} (Token {{ b.token_number }})</h4>
+
+        <p>
+          {{ b.start_time.strftime("%d %b %Y %I:%M %p") }}
+          –
+          {{ b.end_time.strftime("%I:%M %p") }}
+        </p>
+
+        <p>Issue: {{ b.issue_description }}</p>
+        <p>Status: <strong>{{ b.status }}</strong></p>
+
+        <div class="doctor-actions">
+
+          {% if b.status == "booked" %}
+            <button
+              class="btn-secondary btn-doc-cancel"
+              data-id="{{ b.id }}">
+              Cancel
+            </button>
+          
+            <button 
+              class="btn-info btn-doc-transfer" 
+              data-id="{{ b.id }}">
+              Transfer
+            </button>
+
+          {% endif %}
+
+          {% if b.status == "ongoing" %}
+            <span class="info-text">Consultation ongoing</span>
+          {% endif %}
+
+          {% if b.status == "completed" %}
+            {% if b.prescription %}
+              <span class="success-text">Prescription uploaded</span>
+            {% else %}
+              <a
+                href="/doctor/prescription/{{ b.id }}"
+                class="btn-primary">
+                Upload Prescription
+              </a>
+            {% endif %}
+          {% endif %}
+
+          {% if b.status == "cancelled" %}
+            <span class="error-text">Cancelled</span>
+          {% endif %}
+
+        </div>
+
+      </div>
+      {% endfor %}
+
+    </div>
+  </section>
+
+</div>
+<div id="transferModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+        <h3>Transfer Appointment</h3>
+        <p>Select a doctor to transfer this patient to:</p>
+        
+        <div class="doctor-selection-grid">
+            {% for doc in all_doctors %}
+                {% if doc.id != doctor.id %}
+                <div class="doc-transfer-card" onclick="confirmTransfer({{ doc.id }}, '{{ doc.name }}')">
+                    <div class="doc-icon">👨‍⚕️</div>
+                    <div class="doc-info">
+                        <h5>Dr. {{ doc.name }}</h5>
+                        <span>{{ doc.department }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+        <button onclick="closeModal()" class="btn-secondary" style="margin-top:15px;">Cancel</button>
+    </div>
+</div>
+
+<script>
+
+// Open the modal and save the booking ID we want to transfer
+let selectedBookingId = null;
+
+document.querySelectorAll(".btn-doc-transfer").forEach(btn => {
+    btn.addEventListener("click", () => {
+        selectedBookingId = btn.dataset.id;
+        document.getElementById('transferModal').style.display = 'flex';
+    });
+});
+
+function closeModal() {
+    document.getElementById('transferModal').style.display = 'none';
+}
+
+// Perform the transfer
+async function confirmTransfer(newDocId, newDocName) {
+    if (!confirm(`Are you sure you want to transfer this patient to Dr. ${newDocName}?`)) return;
+
+    const res = await fetch(`/api/doctor/booking/${selectedBookingId}/transfer`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ new_doctor_id: newDocId })
+    });
+
+    const data = await res.json();
+    alert(data.message);
+    if (data.success) location.reload();
+}
+/* ================= ADD FREE SCHEDULE ================= */
+document.getElementById("btn-doc-add-schedule")?.addEventListener("click", async () => {
+  const start = document.getElementById("doc-start").value;
+  const end = document.getElementById("doc-end").value;
+
+  if (!start || !end) {
+    alert("Please select start and end time");
+    return;
+  }
+
+  const res = await fetch("/api/doctor/add_schedule", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      start_time: start,
+      end_time: end
+    })
+  });
+
+  const data = await res.json();
+  alert(data.message);
+  if (data.success) location.reload();
+});
+
+/* ================= CANCEL BOOKING ================= */
+document.querySelectorAll(".btn-doc-cancel").forEach(btn => {
+  btn.addEventListener("click", async () => {
+    const reason = prompt("Enter reason for cancellation:");
+    if (!reason) return;
+
+    const res = await fetch(`/api/doctor/booking/${btn.dataset.id}/cancel`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reason })
+    });
+
+    const data = await res.json();
+    alert(data.message || "Booking cancelled");
+    if (data.success) location.reload();
+  });
+});
+</script>
+
+{% endblock %}

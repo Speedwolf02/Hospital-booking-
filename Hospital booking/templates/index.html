@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+
+  <!-- ================= LEFT TEXT ================= -->
+  <div class="hero-text">
+    <h1>Smart AI Hospital Booking</h1>
+
+    <p>
+      Book doctor appointments using an
+      <strong>offline AI voice assistant</strong>.
+      No internet required. Fast, secure, and intelligent scheduling.
+    </p>
+
+    <a href="{{ url_for('login') }}" class="btn-primary">
+      Get Started
+    </a>
+  </div>
+
+  <!-- ================= RIGHT GRAPHIC ================= -->
+  <div class="hero-graphic">
+    <div class="glow-circle">
+      <div class="web-lines"></div>
+    </div>
+  </div>
+
+</section>
+{% endblock %}

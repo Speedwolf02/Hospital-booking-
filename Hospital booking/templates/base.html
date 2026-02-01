@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Hospital Scheduler</title>
+
+  <!-- MAIN CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<!-- ================= TOP NAV ================= -->
+<header class="top-nav">
+  <div class="brand">AI Hospital Scheduler</div>
+
+  <nav>
+    <a href="{{ url_for('index') }}">Home</a>
+
+    {% if current_user.is_authenticated %}
+      <a href="#">Profile</a>
+      <a href="#">About</a>
+      <a href="#">AI Model Data</a>
+
+      {% if current_user.role == "admin" %}
+        <a href="{{ url_for('admin_dashboard') }}">Admin Panel</a>
+      {% elif current_user.role == "doctor" %}
+        <a href="{{ url_for('doctor_dashboard') }}">Doctor Dashboard</a>
+      {% else %}
+        <a href="{{ url_for('user_dashboard') }}">My Dashboard</a>
+      {% endif %}
+
+      <a href="{{ url_for('logout') }}" class="logout-link">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Login</a>
+      <a href="{{ url_for('register') }}">Register</a>
+    {% endif %}
+  </nav>
+</header>
+
+<!-- ================= FLASH MESSAGES ================= -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-container">
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<!-- ================= PAGE CONTENT ================= -->
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<!-- ================= GLOBAL JS ================= -->
+<script src="{{ url_for('static', filename='js/stt_recording.js') }}"></script>
+<script src="{{ url_for('static', filename='js/user_actions.js') }}"></script>
+
+</body>
+</html>
